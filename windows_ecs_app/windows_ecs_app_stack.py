@@ -13,13 +13,19 @@ class WindowsEcsAppStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # default is all AZs in region
+        # Creates a VPC. It will automatically divide the provided VPC CIDR range,
+        # and create public and private subnets per Availability Zone. Network routing
+        # for the public subnets will be configured to allow outbound access directly
+        # via an Internet Gateway. Network routing for the private subnets will be
+        # configured to allow outbound access via a set of resilient NAT Gateways (one per AZ).
         vpc = ec2.Vpc(self, 'ContainersVPC', max_azs=3)
 
+        # Creates an ECS cluster and associates it to the VPC created above
         cluster = ecs.Cluster(self,
                               'WindowsAppCluster',
                               vpc=vpc)
 
+        # The Fargate based task definition
         windows_task = ecs.FargateTaskDefinition(
             self,
             'WindowsAppTask',
@@ -30,6 +36,9 @@ class WindowsEcsAppStack(Stack):
                 operating_system_family=ecs.OperatingSystemFamily.WINDOWS_SERVER_2019_CORE
             )
         )
+
+        # Add the Windows Server Core 2019 IIS container to this task and map port 80
+        # on the host to port 80 on the container
         windows_task.add_container(
             'WindowsAppContainer',
             image=ecs.ContainerImage.from_registry(
@@ -45,6 +54,9 @@ class WindowsEcsAppStack(Stack):
                 )
             ]
         )
+
+        # Creates an ECS service with the VPC, cluster, and task we specified above
+        # Also creates a load balancer, target groups, and security groups!
         ecs_patterns.ApplicationLoadBalancedFargateService(self,
                                                            'WindowsAppService',
                                                            cluster=cluster,

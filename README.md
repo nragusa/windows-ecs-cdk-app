@@ -20,8 +20,11 @@ pipenv install
 
 ## Deploy
 
-Once the dependencies are installed, it's time to deploy!
+Once the dependencies are installed, it's time to synthesize and deploy!
 
 ```bash
+# Synthesize the app and see what it generates
+cdk synth
+# If the above looks OK, deploy!
 cdk deploy
 ```
