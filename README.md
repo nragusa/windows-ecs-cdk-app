@@ -12,6 +12,8 @@ Make sure you have the latest version of the [CDK](https://docs.aws.amazon.com/c
 Next, install the dependencies required by this app. It uses `Pipenv` for python dependency management, so make sure
 [Pipenv](https://pipenv.pypa.io/en/latest/install/) is installed.
 
+Once installed, run the following:
+
 ```bash
 pipenv --python 3.9
 pipenv shell
